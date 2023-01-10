@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<tr class="active" th:each="page :${activityPageInfo.list}">
+    <td><input type="checkbox"/></td>
+    <td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';" th:text="${page.name}">发传单</a></td>
+    <td th:text="${page.owner}">zhangsan</td>
+    <td th:text="${page.startDate}">2020-10-10</td>
+    <td th:text="${page.endDate}">2020-10-20</td>
+</tr>
+</body>
+</html>
