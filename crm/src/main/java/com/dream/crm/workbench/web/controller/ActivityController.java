@@ -8,6 +8,8 @@ import com.dream.crm.commons.utils.UUIDUtils;
 import com.dream.crm.settings.pojo.User;
 import com.dream.crm.settings.services.impl.UserServiceImpl;
 import com.dream.crm.workbench.pojo.Activity;
+import com.dream.crm.workbench.pojo.ActivityRemark;
+import com.dream.crm.workbench.services.impl.ActivityRemarkServiceImpl;
 import com.dream.crm.workbench.services.impl.ActivityServiceImpl;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -15,7 +17,9 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,8 +27,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -38,7 +40,8 @@ public class ActivityController {
     private UserServiceImpl userService;
     @Autowired
     private ActivityServiceImpl activityService;
-
+    @Autowired
+    private ActivityRemarkServiceImpl activityRemarkService;
     /**
      * 获取用户信息并跳转到市场活动页面
      * @param request
@@ -394,5 +397,20 @@ public class ActivityController {
         return returnObject;
     }
 
+    /**
+     * 查询市场活动详情
+     * @return
+     */
+    @RequestMapping(value = "/workbench/activity/detailActivity.do")
+    public String detailActivity(@RequestParam(value = "id") String id, HttpServletRequest request){
+        //调用方法，查询数据
+        Activity activity = activityService.queryActivityForDetailById(id);
+        List<ActivityRemark> activityRemarks = activityRemarkService.queryActivityRemarkForDetailById(id);
+        //把数据保存到request中
+        request.setAttribute("activity",activity);
+        request.setAttribute("activityRemarks",activityRemarks);
 
+        //请求转发
+        return "workbench/activity/detail";
+    }
 }
