@@ -6,31 +6,29 @@ import com.dream.crm.commons.utils.DateUtils;
 import com.dream.crm.commons.utils.UUIDUtils;
 import com.dream.crm.settings.pojo.User;
 import com.dream.crm.workbench.pojo.ActivityRemark;
-import com.dream.crm.workbench.services.impl.ActivityRemarkServiceImpl;
+import com.dream.crm.workbench.pojo.ClueRemark;
+import com.dream.crm.workbench.services.ClueRemarkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
 
 @Controller
-public class ActivityRemarkController {
+public class ClueRemarkController {
+
     @Autowired
-    private ActivityRemarkServiceImpl activityRemarkService;
-
-
+    private ClueRemarkService remarkService;
     /**
-     * 保存市场活动备注
+     * 保存创建的线索备注
      * @param remark
      * @return
      */
-    @RequestMapping("/workbench/activity/saveCreateActivityRemark.do")
+    @RequestMapping("/workbench/clue/saveCreateClueRemark.do")
     @ResponseBody
-    public Object saveCreateActivityRemark(ActivityRemark remark, HttpSession session){
+    public Object saveCreateActivityRemark(ClueRemark remark, HttpSession session){
         //封装参数
         User user = (User) session.getAttribute(Contants.SESSION_USER);
         remark.setId(UUIDUtils.getUUID());
@@ -40,7 +38,7 @@ public class ActivityRemarkController {
 
         ReturnObject returnObject = new ReturnObject();
         try {
-            int ret = activityRemarkService.saveCreateActivityRemark(remark);
+            int ret = remarkService.saveCreateClueRemark(remark);
             if(ret>0){
                 returnObject.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
                 returnObject.setRetData(remark);
@@ -56,18 +54,19 @@ public class ActivityRemarkController {
         return returnObject;
     }
 
+
     /**
-     * 删除市场活动备注
+     * 删除线索备注
      * @param id
      * @return
      */
-    @RequestMapping("/workbench/activity/deleteActivityRemarkById.do")
+    @RequestMapping("/workbench/clue/deleteClueRemarkById.do")
     @ResponseBody
-    public Object deleteActivityRemarkById(String id){
+    public Object deleteClueRemarkById(String id){
         ReturnObject returnObject = new ReturnObject();
 //        ActivityRemark activityRemark = activityRemarkService.queryById(id);
         try {
-            int ret = activityRemarkService.deleteActivityRemarkById(id);
+            int ret =remarkService.deleteByPrimaryKey(id);
 
             if(ret>0){
                 returnObject.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
@@ -89,27 +88,27 @@ public class ActivityRemarkController {
 
 
     /**
-     * 保存修改的市场活动备注
-     * @param activityRemark
+     * 保存修改的线索备注
+     * @param clueRemark
      * @param session
      * @return
      */
-    @RequestMapping("/workbench/activity/saveEditActivityRemark.do")
+    @RequestMapping("/workbench/clue/saveEditClueRemark.do")
     @ResponseBody
-    public Object saveEditActivityRemark(ActivityRemark activityRemark,HttpSession session){
+    public Object saveEditActivityRemark(ClueRemark clueRemark,HttpSession session){
         User user = (User) session.getAttribute(Contants.SESSION_USER);
         //封装参数
-        activityRemark.setEditTime(DateUtils.formateDateTime(new Date()));
-        activityRemark.setEditBy(user.getId());
-        activityRemark.setEditFlag(Contants.REMARK_EDIT_FLAG_YES_EDITED);
+        clueRemark.setEditTime(DateUtils.formateDateTime(new Date()));
+        clueRemark.setEditBy(user.getId());
+        clueRemark.setEditFlag(Contants.REMARK_EDIT_FLAG_YES_EDITED);
 
         ReturnObject returnObject = new ReturnObject();
         try {
-            int ret = activityRemarkService.saveEditActivityRemark(activityRemark);
+            int ret = remarkService.saveEditByPrimaryKey(clueRemark);
             if (ret > 0){
                 if(ret>0){
                     returnObject.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
-                    returnObject.setRetData(activityRemark);
+                    returnObject.setRetData(clueRemark);
                 }else {
                     returnObject.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
                     returnObject.setMessage("系统繁忙，请稍后重试...");

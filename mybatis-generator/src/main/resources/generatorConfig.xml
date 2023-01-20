@@ -17,18 +17,18 @@
         </jdbcConnection>
         <!-- javaBean的生成策略-->
         <javaModelGenerator targetPackage="com.dream.crm.workbench.pojo"
-                            targetProject="D:\idea\crmProjet\crm\src\main\java">
+                            targetProject="D:\idea\crmProject\crm\src\main\java">
             <property name="enableSubPackages" value="true" />
             <property name="trimStrings" value="true" />
         </javaModelGenerator>
         <!-- SQL映射文件的生成策略 -->
         <sqlMapGenerator targetPackage="com.dream.crm.workbench.mapper"
-                         targetProject="D:\idea\crmProjet\crm\src\main\resources">
+                         targetProject="D:\idea\crmProject\crm\src\main\resources">
             <property name="enableSubPackages" value="true" />
         </sqlMapGenerator>
         <!-- Mapper接口的生成策略 -->
         <javaClientGenerator type="XMLMAPPER"
-                             targetPackage="com.dream.crm.workbench.mapper" targetProject="D:\idea\crmProjet\crm\src\main\java">
+                             targetPackage="com.dream.crm.workbench.mapper" targetProject="D:\idea\crmProject\crm\src\main\java">
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
         <!-- 逆向分析的表 -->
@@ -43,9 +43,30 @@
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
+        </table>
+        <table tableName="tbl_activity_remark" domainObjectName="ActivityRemark"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
+        </table>
+        <table tableName="tbl_dictionary_type" domainObjectName="DictionaryType"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
+        </table>
+
+        <table tableName="tbl_dic_value" domainObjectName="DicValue"
+                       enableCountByExample="false" enableUpdateByExample="false"
+                       enableDeleteByExample="false" enableSelectByExample="false"
+                       selectByExampleQueryId="false">
+        </table>
+        <table tableName="tbl_clue" domainObjectName="Clue"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false">
         </table>-->
 
-        <table tableName="tbl_activity_remark" domainObjectName="ActivityRemark"
+        <table tableName="tbl_clue_remark" domainObjectName="ClueRemark"
                enableCountByExample="false" enableUpdateByExample="false"
                enableDeleteByExample="false" enableSelectByExample="false"
                selectByExampleQueryId="false">
