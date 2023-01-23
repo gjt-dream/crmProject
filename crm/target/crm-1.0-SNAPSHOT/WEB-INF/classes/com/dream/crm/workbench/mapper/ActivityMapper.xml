@@ -314,4 +314,23 @@
             where clue_id = #{clueId}
       )
     </select>
+  <select id="selectActivityDetailByIds" parameterType="string" resultType="com.dream.crm.workbench.pojo.Activity">
+    select a.id,u.name as owner, a.name, a.start_date, a.end_date
+    from tbl_activity a
+           join tbl_user u on a.owner = u.id
+    where a.id in 
+    <foreach collection="array" item="id" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </select>
+  <select id="selectActivityForConvertByNameClueId" parameterType="map" resultMap="BaseResultMap">
+    select a.id,u.name as owner, a.name, a.start_date, a.end_date
+    from tbl_activity a
+    join tbl_user u on a.owner = u.id
+    where a.name like '%' #{activityName} '%' and a.id in(
+            select activity_id
+            from tbl_clue_activity_relation
+            where clue_id = #{clueId}
+    )
+  </select>
 </mapper>

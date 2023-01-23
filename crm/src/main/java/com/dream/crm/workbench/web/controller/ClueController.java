@@ -10,8 +10,10 @@ import com.dream.crm.settings.services.DicValueService;
 import com.dream.crm.settings.services.UserService;
 import com.dream.crm.workbench.pojo.Activity;
 import com.dream.crm.workbench.pojo.Clue;
+import com.dream.crm.workbench.pojo.ClueActivityRelation;
 import com.dream.crm.workbench.pojo.ClueRemark;
 import com.dream.crm.workbench.services.ActivityService;
+import com.dream.crm.workbench.services.ClueActivityRelationService;
 import com.dream.crm.workbench.services.ClueService;
 import com.dream.crm.workbench.services.ClueRemarkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class ClueController {
@@ -43,6 +42,9 @@ public class ClueController {
 
     @Autowired
     private ClueRemarkService clueRemarkService;
+
+    @Autowired
+    private ClueActivityRelationService clueActivityRelationService;
 
     @RequestMapping("/workbench/clue/index.do")
     public String index(HttpServletRequest request){
@@ -231,6 +233,114 @@ public class ClueController {
         map.put("clueId",clueId);
         //调用方法
         List<Activity> activityList = activityService.queryActivityDetailByNameClueId(map);
+        return activityList;
+    }
+
+
+    /**
+     * 保存关联的市场活动
+     * @param activityId
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/workbench/clue/saveBind.do")
+    @ResponseBody
+    public Object saveBind(String[] activityId,String clueId){
+        //封装参数
+        ClueActivityRelation clueActivityRelation = null;
+        ArrayList<ClueActivityRelation> relationList = new ArrayList<>();
+        for (String ai:activityId) {
+            clueActivityRelation = new ClueActivityRelation();
+            clueActivityRelation.setActivityId(ai);
+            clueActivityRelation.setClueId(clueId);
+            clueActivityRelation.setId(UUIDUtils.getUUID());
+            relationList.add(clueActivityRelation);
+        }
+        //调用方法
+        //保存参数
+        ReturnObject returnObject = new ReturnObject();
+        try {
+            int ret = clueActivityRelationService.saveCreateClueActivityRelationByList(relationList);
+            if (ret > 0){
+                returnObject.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
+                List<Activity> activityList = activityService.queryActivityDetailByIds(activityId);
+                returnObject.setRetData(activityList);
+            }else {
+                returnObject.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
+                returnObject.setMessage("系统繁忙，请稍后重试...");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            returnObject.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
+            returnObject.setMessage("系统繁忙，请稍后重试...");
+        }
+        return returnObject;
+
+    }
+
+
+    /**
+     * 解除市场活动关联
+     * @param relation
+     * @return
+     */
+    @RequestMapping("/workbench/clue/saveUnBind.do")
+    @ResponseBody
+    public Object saveUnBind(ClueActivityRelation relation){
+        //调用方法
+        //保存参数
+        ReturnObject returnObject = new ReturnObject();
+        try {
+            int ret = clueActivityRelationService.deleteClueActivityRelationByClueIdActivityId(relation);
+            if (ret > 0){
+                returnObject.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
+            }else {
+                returnObject.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
+                returnObject.setMessage("系统繁忙，请稍后重试...");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            returnObject.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
+            returnObject.setMessage("系统繁忙，请稍后重试...");
+        }
+
+        return returnObject;
+    }
+
+
+    /**
+     * 跳转到转换页面
+     * @param id
+     * @return
+     */
+    @RequestMapping("/workbench/clue/toConvert.do")
+    public String toConvert(String id,HttpServletRequest request){
+        //调用方法，查询线索的关键信息
+        Clue clue = clueService.queryClueForDetailById(id);
+        List<DicValue> stageList = dicValueService.queryDicValueByTypeCode("stage");
+        //把数据保存到作用域中
+        request.setAttribute("clue",clue);
+        request.setAttribute("stageList",stageList);
+
+        return "workbench/clue/convert";
+    }
+
+
+    /**
+     * 在转换页面查询已经关联过的市场活动
+     * @param activityName
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/workbench/clue/queryClueActivityRelationByClueIdActivityId.do")
+    @ResponseBody
+    public Object queryClueActivityRelationByClueIdActivityId(String activityName,String clueId){
+        //封装参数
+        Map<String, Object> map = new HashMap<>();
+        map.put("activityName",activityName);
+        map.put("clueId",clueId);
+        //调用方法
+        List<Activity> activityList = activityService.queryActivityForConvertByNameClueId(map);
         return activityList;
     }
 }

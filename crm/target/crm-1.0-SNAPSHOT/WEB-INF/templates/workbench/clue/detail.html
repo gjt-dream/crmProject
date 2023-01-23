@@ -192,7 +192,9 @@
 		//给关联市场活动按钮添加单击事件
 		$("#bindActivityBtn").click(function () {
 			//初始化工作
-
+			//清空搜索框
+			$("#searchActivityTxt").val("");
+			$("#tBody").html("");
 			//弹出关联市场活动模态窗口
 			$("#bindModal").modal("show");
 		});
@@ -240,7 +242,85 @@
 			$("#tBody input[type='checkbox']").prop("checked",this.checked);
 		})
 
+		//给关联保存市场活动添加单击事件
+		$("#saveBindActivityBtn").click(function () {
+			//收集参数
+			var activityIds = $("#tBody input[type='checkbox']:checked");
+			var clueId = $("#clueId").val();
+			//表单验证
+			if (activityIds.size() == 0){
+				alert("请选择要关联的市场活动");
+				return;
+			}
+			var ids = "";
+			$.each(activityIds,function () {
+				ids += "activityId=" + this.value + "&";
+			});
+			ids += "clueId="+clueId;
+			//发送请求
+			//发送请求
+			$.ajax({
+				url: basePath + '/workbench/clue/saveBind.do',
+				data:ids,
+				type:'post',
+				dataType:'json',
+				success:function (data){
+					if(data.code=="1"){
+						//关闭模态窗口‘
+						$("#bindModal").modal("hide");
+						//刷新已经关联过的市场活动列表
+						var htmlStr="";
+						$.each(data.retData,function (index,obj){
+							htmlStr+="<tr id=\" tr_"+obj.id+" \">";
+							htmlStr+="<td>"+ obj.name +"</td>";
+							htmlStr+="<td>"+ obj.startDate +"</td>";
+							htmlStr+="<td>"+ obj.endDate +"</td>";
+							htmlStr+="<td>"+ obj.owner +"</td>";
+							htmlStr+="<td><a href = \"javascript:void(0);\"activityId = \" "+obj.id+" \"style = \"text-decoration: none;\" > <span class = \"glyphicon glyphicon-remove\" ></span>解除关联</a ></td>";
+							htmlStr+="</tr>";
+						});
+						$("#relationTBody").append(htmlStr);
+					}else{
+						//提示信息
+						alert(data.message);
+					}
+				}
+			})
+		})
 
+		//给所有的解除关联按钮添加单击事件
+		$("#relationTBody").on("click","a",function () {
+			//收集参数
+			var activityId = $(this).attr("activityId");
+			var clueId = $("#clueId").val();
+
+			if(window.confirm("确定删除吗？")){
+				$.ajax({
+					url: basePath + '/workbench/clue/saveUnBind.do',
+					data:{
+						activityId:activityId,
+						clueId:clueId
+					},
+					type:'post',
+					dataType:'json',
+					success:function (data){
+						if (data.code == "1"){
+							$("#tr_" + activityId).remove();
+						}else{
+							//提示信息
+							alert(data.message);
+						}
+					}
+				})
+			}
+		})
+		
+		//给 转换按钮添加单击事件
+		$("#convertClueBtn").click(function () {
+			var id = $("#clueId").val();
+			//发送同步请求
+			window.location.href = "toConvert.do?id="+id;
+		})
 
 	});
 	
@@ -328,7 +408,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">关联</button>
+					<button type="button" class="btn btn-primary" id="saveBindActivityBtn">关联</button>
 				</div>
 			</div>
 		</div>
@@ -352,7 +432,7 @@
 				</small>
 		</div>
 		<div style="position: relative; height: 50px; width: 500px;  top: -72px; left: 700px;">
-			<button type="button" class="btn btn-default" onclick="window.location.href='convert.html';"><span class="glyphicon glyphicon-retweet"></span> 转换</button>
+			<button type="button" class="btn btn-default" id="convertClueBtn"><span class="glyphicon glyphicon-retweet"></span> 转换</button>
 			
 		</div>
 	</div>
@@ -529,8 +609,8 @@
 							<td></td>
 						</tr>
 					</thead>
-					<tbody th:each="activitie :${activities}">
-						<tr>
+					<tbody id="relationTBody">
+						<tr th:each="activitie :${activities}" th:id="'tr_' + ${activitie.id}">
 							<td th:text="${activitie.name}">发传单</td>
 							<td th:text="${activitie.startDate}">2020-10-10</td>
 							<td th:text="${activitie.endDate}">2020-10-20</td>

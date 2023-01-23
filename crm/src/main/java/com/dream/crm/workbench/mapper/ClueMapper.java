@@ -72,4 +72,11 @@ public interface ClueMapper {
      * @return
      */
     Clue selectClueForDetailById(String id);
+
+    /**
+     * 根据id查询线索信息
+     * @param id
+     * @return
+     */
+    Clue selectClueById(String id);
 }
