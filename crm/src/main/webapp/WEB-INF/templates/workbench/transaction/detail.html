@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 
-<link href="../../../../static/jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
 
 <style type="text/css">
 .mystage{
@@ -18,10 +18,11 @@
 }
 </style>
 	
-<script type="text/javascript" src="../../../../static/jquery/jquery-1.11.1-min.js"></script>
-<script type="text/javascript" src="../../../../static/jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
 
-<script type="text/javascript">
+<script type="text/javascript" th:inline="javascript">
+	var basePath = [[${#httpServletRequest.getScheme() + "://" + #httpServletRequest.getServerName() + ":" + #httpServletRequest.getServerPort() + #httpServletRequest.getContextPath()}]];
 
 	//默认情况下取消和保存按钮是隐藏的
 	var cancelAndSaveBtnDefault = true;
@@ -82,6 +83,9 @@
                         }
                     }, 100);
                 });
+
+
+
 	});
 	
 	
@@ -99,7 +103,7 @@
 	<!-- 大标题 -->
 	<div style="position: relative; left: 40px; top: -30px;">
 		<div class="page-header">
-			<h3>动力节点-交易01 <small>￥5,000</small></h3>
+			<h3 th:text="${tran.name}">动力节点-交易01 </h3><nobr><small th:text="${tran.money}">￥5,000</small></nobr>
 		</div>
 		
 	</div>
@@ -111,7 +115,24 @@
 	<!-- 阶段状态 -->
 	<div style="position: relative; left: 40px; top: -50px;">
 		阶段&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<span class="glyphicon glyphicon-ok-circle mystage" data-toggle="popover" data-placement="bottom" data-content="资质审查" style="color: #90F790;"></span>
+		<spen th:each="stage:${stageList}">
+			<!--如果stage就是当前交易所处阶段，则图标显示为map-marker，颜色显示为绿色-->
+			<span th:if="${tran.stage} == ${stage.value}">
+				<span class="glyphicon glyphicon-map-marker mystage" data-toggle="popover" data-placement="bottom" th:data-content="${stage.value}" style="color: #90F790;" ></span>
+				-----------
+			</span>
+			<!--如果stage处在当前交易所处阶段前边，则图标显示为ok-circle，颜色显示为绿色-->
+			<span th:if="${tran.orderNo} > ${stage.orderNo}">
+				<span class="glyphicon glyphicon-ok-circle mystage" data-toggle="popover" data-placement="bottom" th:data-content="${stage.value}" style="color: #90F790;" ></span>
+				-----------
+			</span>
+			<!--如果stage处在当前交易所处阶段前边，则图标显示为ok-circle，颜色显示为绿色-->
+			<span th:if="${tran.orderNo} < ${stage.orderNo}">
+				<span class="glyphicon glyphicon-record mystage" data-toggle="popover" data-placement="bottom" th:data-content="${stage.value}" ></span>
+				-----------
+			</span>
+		</spen>
+	<!--	<span class="glyphicon glyphicon-ok-circle mystage" data-toggle="popover" data-placement="bottom" data-content="资质审查" style="color: #90F790;"></span>
 		-----------
 		<span class="glyphicon glyphicon-ok-circle mystage" data-toggle="popover" data-placement="bottom" data-content="需求分析" style="color: #90F790;"></span>
 		-----------
@@ -128,71 +149,71 @@
 		<span class="glyphicon glyphicon-record mystage" data-toggle="popover" data-placement="bottom" data-content="丢失的线索"></span>
 		-----------
 		<span class="glyphicon glyphicon-record mystage" data-toggle="popover" data-placement="bottom" data-content="因竞争丢失关闭"></span>
-		-----------
-		<span class="closingDate">2010-10-10</span>
+		----------->
+		<span class="closingDate" th:text="${tran.expectedDate}">2010-10-10</span>
 	</div>
 	
 	<!-- 详细信息 -->
 	<div style="position: relative; top: 0px;">
 		<div style="position: relative; left: 40px; height: 30px;">
-			<div style="width: 300px; color: gray;">所有者</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>zhangsan</b></div>
+			<div style="width: 300px; color: gray;" >所有者</div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.owner}">zhangsan</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">金额</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>5,000</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${tran.money}">5,000</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 10px;">
 			<div style="width: 300px; color: gray;">名称</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>动力节点-交易01</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.name}">动力节点-交易01</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">预计成交日期</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>2017-02-07</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${tran.expectedDate}">2017-02-07</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 20px;">
 			<div style="width: 300px; color: gray;">客户名称</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>动力节点</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.customerId}">动力节点</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">阶段</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>谈判/复审</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${tran.stage}">谈判/复审</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 30px;">
 			<div style="width: 300px; color: gray;">类型</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>新业务</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.type} +' '">新业务</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">可能性</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>90</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${tran.possibility}">90</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 40px;">
 			<div style="width: 300px; color: gray;">来源</div>
-			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b>广告</b></div>
+			<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.source} + ''">广告</b></div>
 			<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">市场活动源</div>
-			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b>发传单</b></div>
+			<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b th:text="${tran.activityId}">发传单</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 50px;">
 			<div style="width: 300px; color: gray;">联系人名称</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>李四</b></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.contactsId}">李四</b></div>
 			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 60px;">
 			<div style="width: 300px; color: gray;">创建者</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;">2017-01-18 10:10:10</small></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.createBy}">zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;" th:text="${tran.createTime}">2017-01-18 10:10:10</small></div>
 			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 70px;">
 			<div style="width: 300px; color: gray;">修改者</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;">2017-01-19 10:10:10</small></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.editBy}">zhangsan&nbsp;&nbsp;</b><small style="font-size: 10px; color: gray;" th:text="${tran.editTime}">2017-01-19 10:10:10</small></div>
 			<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 80px;">
 			<div style="width: 300px; color: gray;">描述</div>
 			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
-				<b>
+				<b th:text="${tran.description}">
 					这是一条线索的描述信息 （线索转换之后会将线索的描述转换到交易的描述中）
 				</b>
 			</div>
@@ -201,7 +222,7 @@
 		<div style="position: relative; left: 40px; height: 30px; top: 90px;">
 			<div style="width: 300px; color: gray;">联系纪要</div>
 			<div style="width: 630px;position: relative; left: 200px; top: -20px;">
-				<b>
+				<b th:text="${tran.contactSummary}">
 					&nbsp;
 				</b>
 			</div>
@@ -209,7 +230,7 @@
 		</div>
 		<div style="position: relative; left: 40px; height: 30px; top: 100px;">
 			<div style="width: 300px; color: gray;">下次联系时间</div>
-			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b>&nbsp;</b></div>
+			<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b th:text="${tran.nextContactTime}">&nbsp;</b></div>
 			<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -20px;"></div>
 		</div>
 	</div>
@@ -219,8 +240,29 @@
 		<div class="page-header">
 			<h4>备注</h4>
 		</div>
-		
-		<!-- 备注1 -->
+
+		<div class="remarkDiv" style="height: 60px;" th:each="remark :${remarkList}">
+			<img th:title="${remark.createBy}" th:src="@{/static/image/user-thumbnail.png}" style="width: 30px; height:30px;">
+			<div style="position: relative; top: -40px; left: 40px;" >
+				<h5 th:text="${remark.noteContent}">哎呦！</h5>
+				<font color="gray">交易</font>
+				<font color="gray">-</font>
+				<b th:text="${tran.name}">发传单</b>
+				<small style="color: gray;">
+					<b th:if="${remark.editFlag}=='0'" th:text="${remark.createTime}">创建时间</b>
+					<b th:if="${remark.editFlag}=='1'" th:text="${remark.editTime}">修改时间</b>
+					<b th:if="${remark.editFlag}=='0'" th:text="'由' + ${remark.createBy} + '创建'">创建者</b>
+					<b th:if="${remark.editFlag}=='1'" th:text="'由' + ${remark.editBy} + '修改'">修改者</b>
+				</small>
+				<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">
+					<a class="myHref" name="editA" th:remarkId="${remark.id}" href="javascript:void(0);"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #E6E6E6;"></span></a>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<!--<a class="myHref" th:href="@{/workbench/activity/deleteActivityRemarkById.do(id=${activityRemark.id})}"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>-->
+					<a class="myHref" name="deleteA" th:remarkId="${remark.id}" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
+				</div>
+		</div>
+
+		<!-- 备注1
 		<div class="remarkDiv" style="height: 60px;">
 			<img title="zhangsan" src="../../../../static/image/user-thumbnail.png" style="width: 30px; height:30px;">
 			<div style="position: relative; top: -40px; left: 40px;" >
@@ -232,9 +274,9 @@
 					<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
 				</div>
 			</div>
-		</div>
+		</div>-->
 		
-		<!-- 备注2 -->
+		<!-- 备注2
 		<div class="remarkDiv" style="height: 60px;">
 			<img title="zhangsan" src="../../../../static/image/user-thumbnail.png" style="width: 30px; height:30px;">
 			<div style="position: relative; top: -40px; left: 40px;" >
@@ -246,7 +288,7 @@
 					<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
 				</div>
 			</div>
-		</div>
+		</div> -->
 		
 		<div id="remarkDiv" style="background-color: #E6E6E6; width: 870px; height: 90px;">
 			<form role="form" style="position: relative;top: 10px; left: 10px;">
@@ -272,12 +314,22 @@
 							<td>阶段</td>
 							<td>金额</td>
 							<td>预计成交日期</td>
-							<td>创建时间</td>
 							<td>创建人</td>
+							<td>创建时间</td>
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
+						<spen th:each="history:${historyList}">
+							<tr>
+								<td th:text="${history.stage}">资质审查</td>
+								<td th:text="${history.money}">5,000</td>
+								<td th:text="${history.expectedDate}">2017-02-07</td>
+								<td th:text="${tran.createBy}">zhangsan</td>
+								<td th:text="${tran.createTimee}">2016-10-10 10:10:10</td>
+							</tr>
+						</spen>
+
+<!--						<tr>
 							<td>资质审查</td>
 							<td>5,000</td>
 							<td>2017-02-07</td>
@@ -299,7 +351,7 @@
 							<td>2017-02-07</td>
 							<td>2017-02-09 10:10:10</td>
 							<td>zhangsan</td>
-						</tr>
+						</tr>-->
 					</tbody>
 				</table>
 			</div>

@@ -97,6 +97,47 @@
 			$("#searchActivityModal").modal("hide");
 		});
 
+		//给转换按钮添加单击事件
+		$("#saveConvertClueBtn").click(function () {
+			//收集参数
+			var clueId = $("#clueId").val();
+			var money = $.trim($("#amountOfMoney").val());
+			var name = $.trim($("#tradeName").val())
+			var expectedDate = $("#expectedClosingDate").val();
+			var stage = $("#stage").val();
+			var activityId = $("#activityId").val();
+			var isCreateTran = $("#isCreateTransaction").prop("checked")
+
+			//表单验证
+			if (money < 0){
+				alert("money只能是非负整数");
+				return;
+			}
+
+			//发送请求
+			$.ajax({
+				url: basePath + '/workbench/clue/convertClue.do',
+				data:{
+					clueId:clueId,
+					money:money,
+					name:name,
+					expectedDate:expectedDate,
+					stage:stage,
+					activityId:activityId,
+					isCreateTran:isCreateTran
+				},
+				type:'post',
+				dataType:'json',
+				success:function (data) {
+					if (data.code == "1"){
+						//跳转到线索主页面
+						window.location.href = "index.do"
+					}else {
+						alert(data.message);
+					}
+				}
+			})
+		})
 
 	});
 </script>
@@ -208,7 +249,7 @@
 		<b th:text="${clue.owner}">zhangsan</b>
 	</div>
 	<div id="operation" style="position: relative; left: 40px; height: 35px; top: 100px;">
-		<input class="btn btn-primary" type="button" value="转换">
+		<input class="btn btn-primary" type="button" id="saveConvertClueBtn" value="转换">
 		&nbsp;&nbsp;&nbsp;&nbsp;
 		<input class="btn btn-default" type="button" value="取消">
 	</div>

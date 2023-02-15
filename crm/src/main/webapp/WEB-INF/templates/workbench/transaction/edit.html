@@ -1,16 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 
-<link href="../../../../static/jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
-<link href="../../../../static/jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
+<link th:href="@{/static/jquery/bootstrap_3.3.0/css/bootstrap.min.css}" type="text/css" rel="stylesheet" />
+<link th:href="@{/static/jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css}" type="text/css" rel="stylesheet" />
 
-<script type="text/javascript" src="../../../../static/jquery/jquery-1.11.1-min.js"></script>
-<script type="text/javascript" src="../../../../static/jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../../../static/jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
-<script type="text/javascript" src="../../../../static/jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+<script type="text/javascript" th:src="@{/static/jquery/jquery-1.11.1-min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap_3.3.0/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script type="text/javascript" th:src="@{/static/jquery/bs_typeahead/bootstrap3-typeahead.min.js}"></script>
+<script type="text/javascript" th:inline="javascript">
 
+	$(function (){
+
+		var basePath = [[${#httpServletRequest.getScheme() + "://" + #httpServletRequest.getServerName() + ":" + #httpServletRequest.getServerPort() + #httpServletRequest.getContextPath()}]];
+
+		showData();
+
+		//给交易的下拉框添加change事件
+		$("#edit-stage").change(function () {
+			//收集参数
+			//$(this).find("option:selected").text();
+			var stageValue = $("#edit-stage option:selected").text();
+			//表单验证
+			if (stageValue == ""){
+				//清空输入框
+				$("#edit-possibility").val("");
+				return;
+			}
+			//向后台发送请求
+			$.ajax({
+				url: basePath + '/workbench/transaction/getPossibilityByStage.do',
+				data:{
+					stageValue:stageValue
+				},
+				type:'post',
+				dataType:'json',
+				success:function (data){
+					//把获取到的可能性放到输入框里
+					$("#edit-possibility").val(data);
+				}
+			});
+		});
+		//当容器加载完成之后，模糊查询客户名字
+		$("#edit-customerName").typeahead({
+			source:function (jquery,process) {
+				$.ajax({
+					url: basePath + '/workbench/transaction/queryAllCustomerName.do',
+					data: {
+						customerName:jquery
+					},
+					type:'post',
+					dataType:'json',
+					success:function (data){
+						process(data);
+					}
+				});
+			}
+		});
+
+
+		//给"保存"按钮添加单击事件
+		$("#saveEditTranBtn").click(function () {
+
+			//收集参数
+			var id = $("#edit-id").val();
+			var owner          =$("#edit-owner").val();
+			var money          =$.trim($("#edit-money").val());
+			var name           =$.trim($("#edit-name").val());
+			var expectedDate   =$("#edit-expectedDate").val();
+			var customerName   =$.trim($("#edit-customerName").val());
+			var stage          =$("#edit-stage").val();
+			alert(stage);
+			return;
+			var type           =$("#edit-type").val();
+			var source         =$("#edit-source").val();
+			var activityId     =$("#edit-activityId").val();
+			var contactsId     =$("#edit-contactsId").val();
+			var description    =$.trim($("#edit-description").val());
+			var contactSummary =$.trim($("#edit-contactSummary").val());
+			var nextContactTime=$("#edit-nextContactTime").val();
+			//表单验证(作业)
+
+			//发送请求
+			$.ajax({
+				url: basePath + '/workbench/transaction/saveEditTran.do',
+				data:{
+					id:id,
+					owner          :owner          ,
+					money          :money          ,
+					name           :name           ,
+					expectedDate   :expectedDate   ,
+					customerName   :customerName   ,
+					stage          :stage          ,
+					type           :type           ,
+					source         :source         ,
+					activityId     :activityId     ,
+					contactsId     :contactsId     ,
+					description    :description    ,
+					contactSummary :contactSummary ,
+					nextContactTime:nextContactTime
+				},
+				type:'post',
+				dataType:'json',
+				success:function (data) {
+					if(data.code=="1"){
+						//跳转到交易主页面
+						window.location.href="index.do";
+					}else{
+						//提示信息
+						alert(data.message);
+					}
+				}
+			});
+		});
+
+	});
+
+	function showData(){
+		var basePath = [[${#httpServletRequest.getScheme() + "://" + #httpServletRequest.getServerName() + ":" + #httpServletRequest.getServerPort() + #httpServletRequest.getContextPath()}]];
+
+		var id = $("#tranId").val();
+		$.ajax({
+			url: basePath + '/workbench/transaction/queryTranById.do',
+			data: {
+				id:id
+			},
+			type:'post',
+			dataType:'json',
+			success:function (data){
+				var stageValue = data.stage;
+				$("#edit-id").val(data.id);
+				$("#edit-owner").val(data.owner);
+				$("#edit-money").val(data.money);
+				$("#edit-name").val(data.name);
+				$("#edit-expectedDate").val(data.expectedDate);
+				$("#edit-customerName").val(data.customerId);
+				 $("#edit-stage").val(stageValue);
+				$("#edit-type").val(data.type);
+				$("#edit-source").val(data.source);
+				$("#edit-activi").val(data.activityId);
+				// $("#edit-possibility").val(data.possibility);
+				$("#edit-contactsName").val(data.contactsId);
+				$("#edit-description").val(data.description);
+				$("#edit-contactSummary").val(data.contactSummary);
+				$("#edit-nextContactTime").val(data.nextContactTime);
+			}
+		});
+	}
+
+</script>
 </head>
 <body>
 
@@ -116,128 +257,114 @@
 	
 	<div style="position:  relative; left: 30px;">
 		<h3>修改交易</h3>
+		<input type="hidden" class="form-control" id="tranId" th:value="${tranId}">
 	  	<div style="position: relative; top: -40px; left: 70%;">
-			<button type="button" class="btn btn-primary">保存</button>
+			<button type="button" class="btn btn-primary" id="saveEditTranBtn">保存</button>
 			<button type="button" class="btn btn-default">取消</button>
 		</div>
 		<hr style="position: relative; top: -40px;">
 	</div>
 	<form class="form-horizontal" role="form" style="position: relative; top: -30px;">
+		<input type="hidden" id="edit-id">
 		<div class="form-group">
-			<label for="create-transactionOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
+			<label for="edit-owner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<select class="form-control" id="create-transactionOwner">
-				  <option>zhangsan</option>
-				  <option>lisi</option>
-				  <option>wangwu</option>
+				<select class="form-control" id="edit-owner">
+					<spen th:each="user :${userList}">
+						<option th:value="${user.id}" th:text="${user.name}">zhangsan</option>
+					</spen>
 				</select>
 			</div>
-			<label for="create-amountOfMoney" class="col-sm-2 control-label">金额</label>
+			<label for="edit-money" class="col-sm-2 control-label">金额</label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-amountOfMoney">
+				<input type="text" class="form-control" id="edit-money">
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="edit-name" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="text" class="form-control" id="edit-name">
+			</div>
+			<label for="edit-expectedDate" class="col-sm-2 control-label">预计成交日期<span style="font-size: 15px; color: red;">*</span></label>
+			<div class="col-sm-10" style="width: 300px;">
+				<input type="datetime-local" class="form-control" id="edit-expectedDate">
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-transactionName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
+			<label for="edit-customerName" class="col-sm-2 control-label">客户名称<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-transactionName">
+				<input type="text" class="form-control" id="edit-customerName" placeholder="支持自动补全，输入客户不存在则新建">
 			</div>
-			<label for="create-expectedClosingDate" class="col-sm-2 control-label">预计成交日期<span style="font-size: 15px; color: red;">*</span></label>
+			<label for="edit-stage" class="col-sm-2 control-label">阶段<span style="font-size: 15px; color: red;">*</span></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-expectedClosingDate">
-			</div>
-		</div>
-		
-		<div class="form-group">
-			<label for="create-accountName" class="col-sm-2 control-label">客户名称<span style="font-size: 15px; color: red;">*</span></label>
-			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-accountName" placeholder="支持自动补全，输入客户不存在则新建">
-			</div>
-			<label for="create-transactionStage" class="col-sm-2 control-label">阶段<span style="font-size: 15px; color: red;">*</span></label>
-			<div class="col-sm-10" style="width: 300px;">
-			  <select class="form-control" id="create-transactionStage">
+			  <select class="form-control" id="edit-stage">
 			  	<option></option>
-			  	<option>资质审查</option>
-			  	<option>需求分析</option>
-			  	<option>价值建议</option>
-			  	<option>确定决策者</option>
-			  	<option>提案/报价</option>
-			  	<option>谈判/复审</option>
-			  	<option>成交</option>
-			  	<option>丢失的线索</option>
-			  	<option>因竞争丢失关闭</option>
+				  <spen th:each="stage:${stageList}" >
+					  <option th:value="${stage.id}" th:text="${stage.value}">资质审查</option>
+				  </spen>
 			  </select>
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-transactionType" class="col-sm-2 control-label">类型</label>
+			<label for="edit-type" class="col-sm-2 control-label">类型</label>
 			<div class="col-sm-10" style="width: 300px;">
-				<select class="form-control" id="create-transactionType">
+				<select class="form-control" id="edit-type">
 				  <option></option>
-				  <option>已有业务</option>
-				  <option>新业务</option>
+					<spen th:each="transactionType:${transactionTypeList}"  >
+						<option th:value="${transactionType.id}" th:text="${transactionType.value}">资质审查</option>
+					</spen>
 				</select>
 			</div>
-			<label for="create-possibility" class="col-sm-2 control-label">可能性</label>
+			<label for="edit-possibility" class="col-sm-2 control-label">可能性</label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-possibility">
+				<input type="text" class="form-control" id="edit-possibility">
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-clueSource" class="col-sm-2 control-label">来源</label>
+			<label for="edit-source" class="col-sm-2 control-label">来源</label>
 			<div class="col-sm-10" style="width: 300px;">
-				<select class="form-control" id="create-clueSource">
+				<select class="form-control" id="edit-source">
 				  <option></option>
-				  <option>广告</option>
-				  <option>推销电话</option>
-				  <option>员工介绍</option>
-				  <option>外部介绍</option>
-				  <option>在线商场</option>
-				  <option>合作伙伴</option>
-				  <option>公开媒介</option>
-				  <option>销售邮件</option>
-				  <option>合作伙伴研讨会</option>
-				  <option>内部研讨会</option>
-				  <option>交易会</option>
-				  <option>web下载</option>
-				  <option>web调研</option>
-				  <option>聊天</option>
+					<spen th:each="source:${sourceList}" >
+						<option th:value="${source.id}" th:text="${source.value}">资质审查</option>
+					</spen>
 				</select>
 			</div>
-			<label for="create-activitySrc" class="col-sm-2 control-label">市场活动源&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findMarketActivity"><span class="glyphicon glyphicon-search"></span></a></label>
+			<label for="edit-activityName" class="col-sm-2 control-label">市场活动源&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findMarketActivity"><span class="glyphicon glyphicon-search"></span></a></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-activitySrc">
+				<input type="text" class="form-control" id="edit-activityName">
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-contactsName" class="col-sm-2 control-label">联系人名称&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findContacts"><span class="glyphicon glyphicon-search"></span></a></label>
+			<label for="edit-contactsName" class="col-sm-2 control-label">联系人名称&nbsp;&nbsp;<a href="javascript:void(0);" data-toggle="modal" data-target="#findContacts"><span class="glyphicon glyphicon-search"></span></a></label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-contactsName">
+				<input type="text" class="form-control" id="edit-contactsName">
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-describe" class="col-sm-2 control-label">描述</label>
+			<label for="edit-description" class="col-sm-2 control-label">描述</label>
 			<div class="col-sm-10" style="width: 70%;">
-				<textarea class="form-control" rows="3" id="create-describe"></textarea>
+				<textarea class="form-control" rows="3" id="edit-description"></textarea>
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-contactSummary" class="col-sm-2 control-label">联系纪要</label>
+			<label for="edit-contactSummary" class="col-sm-2 control-label">联系纪要</label>
 			<div class="col-sm-10" style="width: 70%;">
-				<textarea class="form-control" rows="3" id="create-contactSummary"></textarea>
+				<textarea class="form-control" rows="3" id="edit-contactSummary"></textarea>
 			</div>
 		</div>
 		
 		<div class="form-group">
-			<label for="create-nextContactTime" class="col-sm-2 control-label">下次联系时间</label>
+			<label for="edit-nextContactTime" class="col-sm-2 control-label">下次联系时间</label>
 			<div class="col-sm-10" style="width: 300px;">
-				<input type="text" class="form-control" id="create-nextContactTime">
+				<input type="datetime-local" class="form-control" id="edit-nextContactTime">
 			</div>
 		</div>
 		

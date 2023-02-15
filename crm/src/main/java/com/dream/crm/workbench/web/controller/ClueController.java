@@ -46,6 +46,7 @@ public class ClueController {
     @Autowired
     private ClueActivityRelationService clueActivityRelationService;
 
+
     @RequestMapping("/workbench/clue/index.do")
     public String index(HttpServletRequest request){
         //获取所有的用户
@@ -342,5 +343,46 @@ public class ClueController {
         //调用方法
         List<Activity> activityList = activityService.queryActivityForConvertByNameClueId(map);
         return activityList;
+    }
+
+    /**
+     * 线索转换
+     * @param clueId
+     * @param money
+     * @param name
+     * @param expectedDate
+     * @param stage
+     * @param activityId
+     * @return
+     */
+    @RequestMapping("/workbench/clue/convertClue.do")
+    @ResponseBody
+    public Object convertClue(String clueId,String money,String name,String expectedDate,String stage,String activityId,String isCreateTran,HttpSession session){
+        //封装参数
+        User user = (User) session.getAttribute(Contants.SESSION_USER);
+        Map<String, Object> map = new HashMap<>();
+        map.put("clueId",clueId);
+        map.put("money",money);
+        map.put("name",name);
+        map.put("expectedDate",expectedDate);
+        map.put("stage",stage);
+        map.put("activityId",activityId);
+        map.put("isCreateTran",isCreateTran);
+        map.put("user",user);
+        ReturnObject returnObject = new ReturnObject();
+        try {
+            //调用方法
+            clueService.saveConvertClue(map);
+
+            returnObject.setCode(Contants.RETURN_OBJECT_CODE_SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            returnObject.setCode(Contants.RETURN_OBJECT_CODE_FAIL);
+            returnObject.setMessage("系统繁忙，请稍后重试...");
+        }
+
+
+        return returnObject;
     }
 }

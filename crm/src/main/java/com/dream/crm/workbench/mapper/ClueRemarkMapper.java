@@ -70,4 +70,19 @@ public interface ClueRemarkMapper {
      * @mbggenerated Tue Jan 10 10:04:13 CST 2023
      */
     int updateClueRemark(ClueRemark clueRemark);
+
+    /**
+     * 根据clueId查询该线索下的所有备注信息
+     * @param clueId
+     * @return
+     */
+    List<ClueRemark> selectClueRemarkByClueId(String clueId);
+
+
+    /**
+     * 根据clueId删除该线索备注下的所有备注
+     * @param clueId
+     * @return
+     */
+    int deleteClueRemarkByClueId(String clueId);
 }
